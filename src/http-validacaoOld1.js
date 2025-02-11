@@ -1,6 +1,6 @@
 import chalk from "chalk";
 
-// Objeto cache para armazenar os status das URLs
+// Cache para armazenar os resultados das requisições
 const cache = {};
 
 function extraiLinks(arrLinks) {
@@ -10,9 +10,9 @@ function extraiLinks(arrLinks) {
 async function checaStatus(listaURLs) {
   const arrStatus = await Promise.all(
     listaURLs.map(async (url) => {
-      // Verifica se a URL já está no cache
+      // Verifica se o status do link já está no cache
       if (cache[url]) {
-        // Se a URL já estiver no cache, retorna o status armazenado
+        // Retorna o status do cache se já estiver armazenado
         return cache[url];
       }
 
@@ -20,11 +20,11 @@ async function checaStatus(listaURLs) {
         const response = await fetch(url);
         const status = response.status;
         
-        // Armazena o status da URL no cache
+        // Armazena o status no cache para futuras requisições
         cache[url] = status;
         return status;
       } catch (erro) {
-        // Se ocorrer um erro, armazena a mensagem de erro no cache
+        // Armazena o erro no cache também
         const erroMensagem = manejaErros(erro);
         cache[url] = erroMensagem;
         return erroMensagem;
@@ -41,13 +41,10 @@ function manejaErros(erro) {
     return chalk.yellow('Conexão recusada. O servidor pode estar indisponível');
   } else if (erro.cause.code === 'ETIMEDOUT') {
     return chalk.blue('A requisição demorou demais para responder. Tente novamente mais tarde');
-  } else if (erro.cause.code === 'MODULE_NOT_FOUND') {
-    return chalk.green('Módulo não encontrado. Verifique se todas as dependências estão instaladas');
   } else {
     return chalk.magenta('Ocorreu algum erro desconhecido');
   }
 }
-
 
 export default async function listaValidada(listaDeLinks) {
   const links = extraiLinks(listaDeLinks);
